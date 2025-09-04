@@ -11,23 +11,99 @@ import pgClient from "../configration/db.js";
 // get read only 
 //delete to remove 
 
+const app = express();
 
 const router = express.Router();//Obejct to hold group od routs to be able to use methods 
-
+app.use(express.json());
 // GET all users : localhost:5000/api/users
-router.get("/", async (req, res) => { /* ... */ });
+router.get("/", async (req, res) => { 
+     try {
+        const result = await pgClient.query("SELECT * FROM users"); //this return a promice that include all data even not needed as the metadata
+        res.json(result.rows);//from row data to Json
+    } catch (err) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+ 
 
 // GET one user : localhost:5000/api/users/5
-router.get("/:id", async (req, res) => { /* ... */ });
+router.get("/:id", async (req, res) => { 
+        try {
+        const result = await pgClient.query("SELECT * FROM users WHERE id = $1", [req.params.id]); //1 IS A PLACEHO,DER 
+        if (result.rows.length === 0) {
+            res.status(404).json({ message: "User not found" });
+        }
+        res.json(result.rows[0]);// ciz the unique id will always be the first 
+    } catch (err) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 
 // POST : localhost:5000/api/users/
-//here the resul is body {nam:, age:}
-router.post("/", async (req, res) => { /* ... */ });
+//here the resul is body including the data feilds 
+router.post("/", async (req, res) => {
+    const { name, email , phonenum ,password, role } = req.body;
+    // const name = req.body.name;
+    // const age=req.body.age;
+
+    try {
+        const result = await pgClient.query(
+            "INSERT INTO users (name, email, phonenum, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING *", [name, email, phonenum, password, role]
+        );
+        //console.log(result.rows);
+
+        res.status(200).json(result.rows[0]);//always returngin is by arrays even if it contain one only 
+    } catch (err) {
+        res.status(500).json({ error: err });
+    }
+
+})
+
 
 // PUT : localhost:5000/api/users/5
-router.put("/:id", async (req, res) => { /* ... */ });
+router.put("/:id", async (req, res) => {
+    const { name, email , phonenum ,password, role } = req.body;
+    try {
+    const result = await pgClient.query(
+      "UPDATE users SET name = $1, email = $2, phonenum = $3, password = $4, role = $5 WHERE id = $6 RETURNING *",
+ 
+     // [name, email, phonenum, password, role, req.params.id]
+
+    );
+     if (result.rows.length === 0) {
+          return res.status(404).json({ message: "User not found" });
+        }
+         console.log(result.rows);
+        res.json(result.rows[0]);
+  } catch (err) {
+    console.error("PUT /users/:id error:", err);
+    return res.status(500).json({ error: err.message, detail: err.detail });
+  }
+});
+
+
+
+
 
 // DELETE user : localhost:5000/api/users/5
-router.delete("/:id", async (req, res) => { /* ... */ });
+router.delete("/:id", async (req, res) => {
+  try {
+    const result = await pgClient.query(
+      "DELETE FROM users WHERE id = $1 RETURNING *",[req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "User deleted", user: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 
 export default router;
