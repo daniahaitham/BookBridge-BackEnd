@@ -1,3 +1,6 @@
+console.log(">> req router file loaded");
+
+
 import express from "express";
 import pgClient from "../configration/db.js";
 
@@ -69,6 +72,53 @@ router.get("/incoming", async (req, res) => {
 });
 
 
+// PATCH /api/req/:id
+router.patch("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const r = await pgClient.query(
+    "UPDATE requests SET status = $1 WHERE id = $2 RETURNING *",
+    [status, id]
+  );
+  res.json({ request: r.rows[0] });
+});
+
+
+
+// routes/req.js
+router.get("/mine", async (req, res) => {
+  const { requesterid } = req.query;
+  if (!requesterid) return res.status(400).json({ error: "requesterid is required" });
+
+  const q = `
+    SELECT r.id, r.bookid, r.requesterid, r.ownerid, r.status, r.created_at,
+           b.title, b.cover
+    FROM requests r
+    JOIN books b ON b.id = r.bookid
+    WHERE r.requesterid = $1
+      AND r.status IN ('pending','rejected')
+    ORDER BY r.created_at DESC`;
+  const r = await pgClient.query(q, [requesterid]);
+  res.json({ requests: r.rows });
+});
+
+// GET /api/req/got?requesterid=13  -> all ACCEPTED requests for this user
+router.get("/got", async (req, res) => {
+  const { requesterid } = req.query;
+  if (!requesterid) return res.status(400).json({ error: "requesterid is required" });
+
+  const q = `
+    SELECT r.id, r.bookid, r.ownerid, r.status, r.created_at,
+           b.title, b.cover
+    FROM requests r
+    JOIN books b ON b.id = r.bookid
+    WHERE r.requesterid = $1
+      AND r.status = 'accepted'
+    ORDER BY r.created_at DESC`;
+  const r = await pgClient.query(q, [requesterid]);
+  res.json({ requests: r.rows });
+});
 
 
 export default router;

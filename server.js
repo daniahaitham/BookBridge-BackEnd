@@ -6,7 +6,10 @@ import userRoutes from "./routes/users.js";
 import authRouter from "./routes/auth.js";   
 import pgClient from "./configration/db.js"; 
 import bookRoutes from "./routes/books.js";
-import requestsRouter from "./routes/req.js";
+import requestsRouter from "./routes/req.js"; 
+
+
+
 
 
 dotenv.config();//read variables in env 
@@ -19,6 +22,8 @@ const PORT = 5000;
 app.use(cors()); //my backend accept WHO can request it 
 app.use(express.json()); //bodies of requests are read as JSON
 app.use(morgan("dev")); //Just for logging for debugging 
+
+
 
 
 app.use("/api/auth", authRouter);//to handle requests start with auth
