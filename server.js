@@ -3,9 +3,9 @@ import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import userRoutes from "./routes/users.js";  
-import pgClient from "./configration/db.js";   
-
-
+import authRouter from "./routes/auth.js";   
+import pgClient from "./configration/db.js"; 
+ 
 dotenv.config();//read variables in env 
 const app = express();//calling this funcrion will create the app object where i can use all the methods like the gest and so one
  
@@ -18,9 +18,12 @@ app.use(express.json()); //bodies of requests are read as JSON
 app.use(morgan("dev")); //Just for logging for debugging 
 
 
-//api is called baseRoute.
+app.use("/api/auth", authRouter);//to handle requests start with auth
+ //api is called baseRoute.
 app.use("/api/users", userRoutes);//this is like calling the ;ines of the routes i have in the users.js file
 
+
+ 
 
 //END POINT : a url on my server using any method (get,post,..) req 
 //req is from client and res is frrm server 
@@ -41,13 +44,6 @@ pgClient.connect().then(()=>{
         console.log(`Server is running on http://localhost:${PORT}`);
     });
 });
-
-
-
-// when u have the 3ed API later:
-//const anyName = process.env.API_KEY;
-
-
-
+ 
 
 

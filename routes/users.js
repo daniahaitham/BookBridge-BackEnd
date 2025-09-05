@@ -11,11 +11,9 @@ import pgClient from "../configration/db.js";
 // get read only 
 //delete to remove 
 
-const app = express();
-
+ 
 const router = express.Router();//Obejct to hold group od routs to be able to use methods 
-app.use(express.json());
-// GET all users : localhost:5000/api/users
+ // GET all users : localhost:5000/api/users
 router.get("/", async (req, res) => { 
      try {
         const result = await pgClient.query("SELECT * FROM users"); //this return a promice that include all data even not needed as the metadata
@@ -44,13 +42,13 @@ router.get("/:id", async (req, res) => {
 // POST : localhost:5000/api/users/
 //here the resul is body including the data feilds 
 router.post("/", async (req, res) => {
-    const { name, email , phonenum ,password, role } = req.body;
+    const { name, email , phonenum ,password, is_admin } = req.body;
     // const name = req.body.name;
     // const age=req.body.age;
 
     try {
         const result = await pgClient.query(
-            "INSERT INTO users (name, email, phonenum, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING *", [name, email, phonenum, password, role]
+            "INSERT INTO users (name, email, phonenum, password, is_admin) VALUES ($1, $2, $3, $4, $5) RETURNING *", [name, email, phonenum, password, is_admin]
         );
         //console.log(result.rows);
 
@@ -64,12 +62,12 @@ router.post("/", async (req, res) => {
 
 // PUT : localhost:5000/api/users/5
 router.put("/:id", async (req, res) => {
-    const { name, email , phonenum ,password, role } = req.body;
+    const { name, email , phonenum ,password, is_admin } = req.body;
     try {
     const result = await pgClient.query(
-      "UPDATE users SET name = $1, email = $2, phonenum = $3, password = $4, role = $5 WHERE id = $6 RETURNING *",
+      "UPDATE users SET name = $1, email = $2, phonenum = $3, password = $4, is_admin = $5 WHERE id = $6 RETURNING *",
  
-     // [name, email, phonenum, password, role, req.params.id]
+      [name, email, phonenum, password, is_admin, req.params.id]
 
     );
      if (result.rows.length === 0) {
