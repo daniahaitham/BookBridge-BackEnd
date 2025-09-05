@@ -6,6 +6,7 @@ import userRoutes from "./routes/users.js";
 import authRouter from "./routes/auth.js";   
 import pgClient from "./configration/db.js"; 
 import bookRoutes from "./routes/books.js";
+import requestsRouter from "./routes/req.js";
 
 
 dotenv.config();//read variables in env 
@@ -27,6 +28,7 @@ app.use("/api/users", userRoutes);//this is like calling the ;ines of the routes
 app.use("/api/books", bookRoutes);
 
  
+app.use("/api/req", requestsRouter);
 
 //END POINT : a url on my server using any method (get,post,..) req 
 //req is from client and res is frrm server 
