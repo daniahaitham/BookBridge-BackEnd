@@ -24,7 +24,7 @@ router.post("/:bookid", async (req, res) => {
       [bookid]
     );
 
-    
+
     if (b.rowCount === 0) {
       return res.status(404).json({ error: "Book not found" });
     }   
@@ -42,9 +42,33 @@ router.post("/:bookid", async (req, res) => {
 
     return res.status(201).json({ request: r.rows[0] });
   } catch (err) {
-    console.error("POST /api/requests error:", err);
+    console.error("POST /api/req error:", err);
     return res.status(500).json({ error: err.message });
   }
 });
+
+
+// GET incoming requests by userid
+router.get("/incoming", async (req, res) => {
+  const { ownerid } = req.query; 
+  try {
+    const r = await pgClient.query(
+     `SELECT r.id, r.bookid, r.requesterid, r.ownerid, r.status, r.created_at,
+              b.title, b.cover
+       FROM requests r
+       JOIN books b ON b.id = r.bookid
+       WHERE r.ownerid = $1
+       ORDER BY r.created_at DESC`,
+      [ownerid]
+    );
+    return res.json({ requests: r.rows });
+  } catch (err) {
+    console.error("GET /api/req/incoming error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 
 export default router;
