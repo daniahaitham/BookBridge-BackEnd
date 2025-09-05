@@ -32,6 +32,8 @@ router.post("/", async (req, res) => {
   }
 });
 
+
+//get a book by USERid 
 router.get("/", async (req, res) => {
   const { userid } = req.query;//grapping the id from the url ( becouse after ? in the front what happen is passing eveytihgn to the requ reuery)
 
@@ -57,6 +59,54 @@ router.get("/", async (req, res) => {
     console.error("GET /api/books error:", err);
     return res.status(500).json({ error: err.message });
     }
+});
+
+
+// keep /all above so it doesn't get caught by :id
+router.get("/all", async (_req, res) => {
+  const r = await pgClient.query(
+    `SELECT id, userid, title, author, price, category, description,
+            notebyowner, cover, availability, created_at
+     FROM books
+     ORDER BY created_at DESC`
+  );
+  res.json({ books: r.rows });
+});
+
+//get book by id
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const r = await pgClient.query(
+      `SELECT id, userid, title, author, price, category, description,
+              notebyowner, cover, availability, created_at
+       FROM books WHERE id = $1`,
+      [id]
+    );
+    if (r.rows.length === 0) 
+      return res.status(404).json({ error: "Book not found" });
+    res.json({ book: r.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+//get all books:
+ router.get("/all", async (_req, res) => {
+  try {
+    const r = await pgClient.query(
+      `SELECT id, userid, title, author, price, category, description,
+              notebyowner, cover, availability, created_at
+       FROM books
+       ORDER BY created_at DESC`
+    );
+    return res.json({ books: r.rows });
+  } catch (err) {
+    console.error("GET /api/books/all error:", err);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 
