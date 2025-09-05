@@ -5,7 +5,8 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/users.js";  
 import authRouter from "./routes/auth.js";   
 import pgClient from "./configration/db.js"; 
- 
+
+
 dotenv.config();//read variables in env 
 const app = express();//calling this funcrion will create the app object where i can use all the methods like the gest and so one
  
