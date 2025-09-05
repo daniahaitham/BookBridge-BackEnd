@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/users.js";  
 import authRouter from "./routes/auth.js";   
 import pgClient from "./configration/db.js"; 
+import bookRoutes from "./routes/books.js";
 
 
 dotenv.config();//read variables in env 
@@ -23,6 +24,7 @@ app.use("/api/auth", authRouter);//to handle requests start with auth
  //api is called baseRoute.
 app.use("/api/users", userRoutes);//this is like calling the ;ines of the routes i have in the users.js file
 
+app.use("/api/books", bookRoutes);
 
  
 
