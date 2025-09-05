@@ -37,15 +37,11 @@ router.get("/", async (req, res) => {
 
 
    try {
-
     if (!userid) {
       return res.status(400).json({ error: "userid is required" });
     }
 
-
-
-
-    if (userid) {
+   
       const r = await pgClient.query(
         `SELECT id, userid, title, author, price, category, description, notebyowner, cover, availability, created_at
          FROM books
@@ -54,7 +50,7 @@ router.get("/", async (req, res) => {
         [userid]
       );
       
-    } 
+     
         return res.json({ books: r.rows });
     }
     catch(err){
@@ -62,8 +58,6 @@ router.get("/", async (req, res) => {
     return res.status(500).json({ error: err.message });
     }
 });
-
-
 
 
 //now users when adding abook should be shown in the books i offer section:
