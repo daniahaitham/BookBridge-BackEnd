@@ -7,6 +7,7 @@ import authRouter from "./routes/auth.js";
 import pgClient from "./configration/db.js"; 
 import bookRoutes from "./routes/books.js";
 import requestsRouter from "./routes/req.js"; 
+import complaintsRouter from "./routes/complaints.js";
 
 
 
@@ -33,6 +34,7 @@ app.use("/api/users", userRoutes);//this is like calling the ;ines of the routes
 app.use("/api/books", bookRoutes);
 
 app.use("/api/req", requestsRouter);
+app.use("/api/complaints", complaintsRouter);
 
 //END POINT : a url on my server using any method (get,post,..) req 
 //req is from client and res is frrm server 
