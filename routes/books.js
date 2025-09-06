@@ -5,7 +5,7 @@ const router = express.Router();
 
 // POST::  /api/books
 router.post("/", async (req, res) => {
-  const {
+  const { //destructing 
     userid,         
     title,
     author,
@@ -62,7 +62,7 @@ router.get("/", async (req, res) => {
 });
 
 
-// keep /all above so it doesn't get caught by :id
+// keep 
 router.get("/all", async (_req, res) => {
   const r = await pgClient.query(
     `SELECT id, userid, title, author, price, category, description,
@@ -72,6 +72,10 @@ router.get("/all", async (_req, res) => {
   );
   res.json({ books: r.rows });
 });
+
+
+
+
 
 //get book by id
 router.get("/:id", async (req, res) => {
@@ -111,8 +115,8 @@ router.get("/:id", async (req, res) => {
 
 
  router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { userid } = req.query;
+  const { id } = req.params; //BY PARAMS CUZ: it was  /:d in the req
+  const { userid } = req.query; //BY QUEYE CUZ : it was ?userid. ..... 
   if (!userid) return res.status(400).json({ error: "userid is required" });
 
   try {
@@ -123,7 +127,7 @@ router.get("/:id", async (req, res) => {
     if (r.rowCount === 0) {
       return res.status(404).json({ error: "Book not found or not owned by user" });
     }
-    return res.json({ ok: true, id: r.rows[0].id });
+    return res.json({ ok: true, id: r.rows[0].id }); //in front i use ( if res.ok)
   } catch (err) {
     console.error("DELETE /api/books/:id error:", err);
     return res.status(500).json({ error: err.message });
@@ -139,7 +143,8 @@ router.put("/:id", async (req, res) => {
   if (!userid) return res.status(400).json({ error: "userid is required" });
 
   // allow partial updates: only fields you send will change
-  const {
+  const {//setting nulls instead of undefined WHEN THEY ARE SENT FROM THE FRONT 
+    //THEN IN THE QUERY I WIL HAVE THE REAL DATA FOR THEM ALL 
     title = null,
     author = null,
     price = null,
@@ -153,18 +158,18 @@ router.put("/:id", async (req, res) => {
   try {
     const r = await pgClient.query(
       `UPDATE books SET
-         title        = COALESCE($1, title),
-         author       = COALESCE($2, author),
-         price        = COALESCE($3, price),
-         category     = COALESCE($4, category),
-         description  = COALESCE($5, description),
-         notebyowner  = COALESCE($6, notebyowner),
-         cover        = COALESCE($7, cover),
-         availability = COALESCE($8, availability)
+         title        = $1,
+         author       = $2,
+         price        = $3,
+         category     = $4,
+         description  = $5,
+         notebyowner  = $6,
+         cover        = $7,
+         availability = $8
        WHERE id = $9 AND userid = $10
        RETURNING *`,
       [title, author, price, category, description, notebyowner, cover, availability, id, userid]
-    );
+    );//note :COALESCE is a SQL functoin take arguments , retun the first non null option it see from the arguments i send
 
     if (r.rows.length === 0) {
       return res.status(404).json({ error: "Book not found or not owned by user" });
@@ -177,6 +182,5 @@ router.put("/:id", async (req, res) => {
 });
 
 
-//now users when adding abook should be shown in the books i offer section:
-
+ 
 export default router;

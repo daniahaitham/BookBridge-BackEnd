@@ -22,12 +22,9 @@ router.post("/:bookid", async (req, res) => {
   }
 
   try {
-    // (optional) verify book exists and owner matches
-    const b = await pgClient.query("SELECT id, userid, availability FROM books WHERE id = $1",
+     const b = await pgClient.query("SELECT id, availability FROM books WHERE id = $1",
       [bookid]
     );
-
-
     if (b.rowCount === 0) {
       return res.status(404).json({ error: "Book not found" });
     }   
@@ -40,7 +37,7 @@ router.post("/:bookid", async (req, res) => {
       `INSERT INTO requests (bookid, requesterid, ownerid, status)
        VALUES ($1, $2, $3, 'pending')
        RETURNING id, bookid, requesterid, ownerid, status, created_at`,
-      [bookid, requesterid, ownerid]///i have this instead of having anither SELECT query it returned the needed dsta
+      [bookid, requesterid, ownerid]
     );
 
     return res.status(201).json({ request: r.rows[0] });
@@ -51,18 +48,17 @@ router.post("/:bookid", async (req, res) => {
 });
 
 
-// GET incoming requests by userid
+// GET incoming requests by userid 
 router.get("/incoming", async (req, res) => {
-  const { ownerid } = req.query; 
-  try {
+  const { ownerid } = req.query;  
+  try {//I NEED INFO FROM REQ AND OTHER BROM THE RELEATED BOOK ( cover and ritle per each card )
     const r = await pgClient.query(
      `SELECT r.id, r.bookid, r.requesterid, r.ownerid, r.status, r.created_at,
               b.title, b.cover
        FROM requests r
        JOIN books b ON b.id = r.bookid
        WHERE r.ownerid = $1
-       ORDER BY r.created_at DESC`,
-      [ownerid]
+       ORDER BY r.created_at DESC`, [ownerid]
     );
     return res.json({ requests: r.rows });
   } catch (err) {
@@ -102,23 +98,5 @@ router.get("/mine", async (req, res) => {
   const r = await pgClient.query(q, [requesterid]);
   res.json({ requests: r.rows });
 });
-
-// GET /api/req/got?requesterid=13  -> all ACCEPTED requests for this user
-router.get("/got", async (req, res) => {
-  const { requesterid } = req.query;
-  if (!requesterid) return res.status(400).json({ error: "requesterid is required" });
-
-  const q = `
-    SELECT r.id, r.bookid, r.ownerid, r.status, r.created_at,
-           b.title, b.cover
-    FROM requests r
-    JOIN books b ON b.id = r.bookid
-    WHERE r.requesterid = $1
-      AND r.status = 'accepted'
-    ORDER BY r.created_at DESC`;
-  const r = await pgClient.query(q, [requesterid]);
-  res.json({ requests: r.rows });
-});
-
 
 export default router;
