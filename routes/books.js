@@ -3,6 +3,24 @@ import pgClient from "../configration/db.js";
 
 const router = express.Router();
 
+
+//get all books:
+ router.get("/all", async (_req, res) => {
+  try {
+    const r = await pgClient.query(
+      `SELECT id, userid, title, author, price, category, description,
+              notebyowner, cover, availability, created_at
+       FROM books
+       ORDER BY created_at DESC`
+    );
+    return res.json({ books: r.rows });
+  } catch (err) {
+    console.error("GET /api/books/all error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
 // POST::  /api/books
 router.post("/", async (req, res) => {
   const { //destructing 
@@ -62,16 +80,7 @@ router.get("/", async (req, res) => {
 });
 
 
-// keep 
-router.get("/all", async (_req, res) => {
-  const r = await pgClient.query(
-    `SELECT id, userid, title, author, price, category, description,
-            notebyowner, cover, availability, created_at
-     FROM books
-     ORDER BY created_at DESC`
-  );
-  res.json({ books: r.rows });
-});
+
 
 
 
@@ -97,21 +106,7 @@ router.get("/:id", async (req, res) => {
 
 
 
-//get all books:
- router.get("/all", async (_req, res) => {
-  try {
-    const r = await pgClient.query(
-      `SELECT id, userid, title, author, price, category, description,
-              notebyowner, cover, availability, created_at
-       FROM books
-       ORDER BY created_at DESC`
-    );
-    return res.json({ books: r.rows });
-  } catch (err) {
-    console.error("GET /api/books/all error:", err);
-    return res.status(500).json({ error: err.message });
-  }
-});
+
 
 
  router.delete("/:id", async (req, res) => {

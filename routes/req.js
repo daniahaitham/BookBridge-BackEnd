@@ -48,6 +48,24 @@ router.post("/:bookid", async (req, res) => {
 });
 
 
+
+
+router.get("/", async (req, res) => {
+  const { ownerid } = req.query;  
+  try {
+    const r = await pgClient.query(
+     `SELECT r.id, r.bookid, r.requesterid, r.ownerid, r.status, r.created_at
+       FROM requests r `
+    );
+    return res.json({ requests: r.rows });
+  } catch (err) {
+    console.error("GET /api/req/ error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 // GET incoming requests by userid 
 router.get("/incoming", async (req, res) => {
   const { ownerid } = req.query;  

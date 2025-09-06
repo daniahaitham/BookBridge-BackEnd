@@ -1,5 +1,6 @@
 import express from "express";
 import pgClient from "../configration/db.js";
+import adminAuth from "../middlewares/adminAuth.js";
 
 const router = express.Router();
 
@@ -27,5 +28,28 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "failed to create complaint" });
   }
 });
+
+router.get("/", async (req, res) => {
+  try {
+    const q = "SELECT * FROM complaints ORDER BY created_at DESC";
+    const r = await pgClient.query(q);
+    res.json({ complaints: r.rows });
+  } catch (e) {
+    res.status(500).json({ error: "failed to fetch complaints" });
+  }
+});
+
+
+//ONLY FOR ADMINS!
+router.get("/", adminAuth, async (req, res) => {
+  try {
+    const q = "SELECT * FROM complaints ORDER BY created_at DESC";
+    const r = await pgClient.query(q);
+    res.json(r.rows);
+  } catch (e) {
+    res.status(500).json({ error: "failed to fetch complaints" });
+  }
+});
+
 
 export default router;

@@ -1,5 +1,6 @@
 import express from 'express';
 import pgClient from "../configration/db.js"; 
+import adminAuth from "../middlewares/adminAuth.js";
 
 //ALL ENDPOINTS WILL BE INCLUDED HERE
 
@@ -14,14 +15,14 @@ import pgClient from "../configration/db.js";
  
 const router = express.Router();//Obejct to hold group od routs to be able to use methods 
  // GET all users : localhost:5000/api/users
-router.get("/", async (req, res) => { 
+router.get("/",adminAuth,async (req, res) => { 
      try {
         const result = await pgClient.query("SELECT * FROM users"); //this return a promice that include all data even not needed as the metadata
         res.json(result.rows);//from row data to Json
     } catch (err) {
         res.status(500).json({ error: "Internal server error" });
     }
-});
+});//check a header first ( admin auth ) 
 
  
 
